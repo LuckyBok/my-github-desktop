@@ -1,0 +1,109 @@
+// Google Apps Script Example for File Upload Logging
+// Save this code in Google Apps Script and deploy as a web app
+
+/**
+ * Process POST requests from the file upload system
+ */
+function doPost(request) {
+  try {
+    // Parse the incoming JSON data
+    const data = JSON.parse(request.postData.contents);
+    
+    // Get access to your spreadsheet (replace with your spreadsheet ID)
+    const spreadsheetId = 'YOUR_GOOGLE_SHEET_ID';
+    const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName('File Uploads');
+    
+    // Format data for the spreadsheet
+    // Format the timestamp to be more readable
+    const timestamp = new Date(data.uploadedAt);
+    const formattedDate = Utilities.formatDate(timestamp, Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss");
+    
+    // Format file size to be more readable (convert to KB or MB)
+    let fileSize = data.fileSize;
+    let fileSizeFormatted;
+    
+    if (fileSize < 1024) {
+      fileSizeFormatted = fileSize + ' B';
+    } else if (fileSize < 1024 * 1024) {
+      fileSizeFormatted = (fileSize / 1024).toFixed(2) + ' KB';
+    } else {
+      fileSizeFormatted = (fileSize / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+    
+    // Append the row
+    sheet.appendRow([
+      formattedDate,             // Timestamp
+      data.fileName,             // File Name
+      data.categoryId,           // Category
+      fileSizeFormatted,         // File Size
+      data.organization || 'Unspecified' // Organization
+    ]);
+    
+    // Return success response
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      message: 'File upload logged successfully'
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    // Return error response
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: 'Error logging file upload: ' + error.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Test the webhook with sample data
+ */
+function testWebhook() {
+  // Sample data for testing
+  const testData = {
+    fileName: 'test-file.pdf',
+    categoryId: 'documents',
+    fileSize: 1024 * 1024 * 2.5, // 2.5 MB
+    uploadedAt: new Date().toISOString(),
+    organization: 'Test Organization'
+  };
+  
+  // Mock a POST request
+  const mockRequest = {
+    postData: {
+      contents: JSON.stringify(testData)
+    }
+  };
+  
+  // Process the mock request
+  const result = doPost(mockRequest);
+  Logger.log(result.getContent());
+}
+
+/* 
+SETUP INSTRUCTIONS:
+
+1. Create a new Google Sheet with the following columns:
+   - Timestamp
+   - File Name
+   - Category
+   - File Size
+   - Organization
+
+2. Copy the above code into a new Google Apps Script project
+   - From your Google Sheet, go to Extensions > Apps Script
+   - Paste this code in the editor
+   - Replace 'YOUR_GOOGLE_SHEET_ID' with your actual spreadsheet ID
+   - Update the sheet name if different from 'File Uploads'
+
+3. Deploy the script as a web app:
+   - Click Deploy > New deployment
+   - Select 'Web app' as deployment type
+   - Set 'Execute as' to 'Me'
+   - Set 'Who has access' to 'Anyone' (for testing) or 'Anyone with Google account' (for production)
+   - Click 'Deploy'
+   - Copy the web app URL provided
+
+4. Use the web app URL in your app's environment variables as NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL
+
+5. Test the integration by uploading a file and checking your Google Sheet
+*/ 

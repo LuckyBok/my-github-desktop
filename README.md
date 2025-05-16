@@ -20,6 +20,56 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Firebase Authentication Setup
+
+This project uses Firebase Authentication for the admin panel. Follow these steps to set it up:
+
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Email/Password authentication in the Firebase console
+3. Create a `.env.local` file in the root of the project with the following variables:
+
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+```
+
+4. Update the admin email addresses in `src/contexts/AuthContext.tsx` to include your admin email(s)
+5. Create users in Firebase Authentication that match your admin emails
+
+## Google Sheets Integration
+
+This project includes integration with Google Sheets to log file uploads. Follow these steps to set it up:
+
+1. Create a new Google Sheet with the following columns:
+   - Timestamp
+   - File Name
+   - Category
+   - File Size
+   - Organization
+
+2. Set up a Google Apps Script webhook:
+   - From your Google Sheet, go to Extensions > Apps Script
+   - Create a new script file and paste the code from `src/lib/google-apps-script.txt`
+   - Replace 'YOUR_GOOGLE_SHEET_ID' with your actual spreadsheet ID
+   - Deploy the script as a web app (Deploy > New deployment)
+   - Set execution to run as you and allow access to "Anyone" or "Anyone with Google account"
+   - Copy the deployment URL
+
+3. Add the webhook URL to your environment variables:
+
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+# ... other Firebase variables
+NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL=your-google-apps-script-webhook-url
+```
+
+Now when files are uploaded through the admin dashboard, they will be automatically logged to your Google Sheet.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

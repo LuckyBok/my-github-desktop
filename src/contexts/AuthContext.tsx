@@ -10,6 +10,12 @@ import {
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
+// List of admin email addresses
+const ADMIN_EMAILS = [
+  'admin@example.com',
+  // Add more admin emails here
+];
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -30,9 +36,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       
-      // For now, we'll consider any authenticated user as an admin
-      // In a real app, you would check against a list of admin emails or a custom claim
-      setIsAdmin(!!user);
+      // Check if the user's email is in the list of admin emails
+      if (user && user.email) {
+        setIsAdmin(ADMIN_EMAILS.includes(user.email));
+      } else {
+        setIsAdmin(false);
+      }
       
       setLoading(false);
     });
@@ -42,7 +51,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check if the signed in user is an admin
+      if (userCredential.user && userCredential.user.email) {
+        const isAdminUser = ADMIN_EMAILS.includes(userCredential.user.email);
+        if (!isAdminUser) {
+          // Sign out the user if they're not an admin
+          await firebaseSignOut(auth);
+          throw new Error('Unauthorized: Only admins can sign in');
+        }
+      }
+      
       router.push('/admin'); // Redirect to admin dashboard after successful login
     } catch (error) {
       console.error('Error signing in:', error);

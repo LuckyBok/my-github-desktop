@@ -130,7 +130,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
       <div className={`p-4 text-center ${className}`}>
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-gray-200 rounded-lg"></div>
+            <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
 
   if (error) {
     return (
-      <div className={`p-4 text-center text-red-600 ${className}`}>
+      <div className={`p-4 text-center text-red-600 dark:text-red-400 ${className}`}>
         <p>{error}</p>
       </div>
     );
@@ -147,7 +147,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
 
   if (files.length === 0) {
     return (
-      <div className={`p-4 text-center text-gray-500 ${className}`}>
+      <div className={`p-4 text-center text-gray-500 dark:text-gray-400 ${className}`}>
         <p>No files found{categoryId ? ' in this category' : ''}</p>
       </div>
     );
@@ -158,7 +158,9 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
       {/* Status Message */}
       {deleteStatus.type && (
         <div className={`p-4 rounded-lg ${
-          deleteStatus.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+          deleteStatus.type === 'success' 
+            ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
+            : 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300'
         }`}>
           <p className="text-sm font-medium">{deleteStatus.message}</p>
         </div>
@@ -172,12 +174,12 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search files..."
-            className="w-full px-4 py-2 pl-10 pr-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 pl-10 pr-10 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
           />
           {/* Search Icon */}
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg
-              className="h-5 w-5 text-gray-400"
+              className="h-5 w-5 text-gray-400 dark:text-gray-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -194,7 +196,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
             >
               <svg
                 className="h-5 w-5"
@@ -214,7 +216,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
         </div>
         {/* Search Results Count */}
         {searchTerm && (
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {filteredFiles.length} {filteredFiles.length === 1 ? 'file' : 'files'} found
           </p>
         )}
@@ -225,7 +227,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
         {filteredFiles.map((file) => (
           <div
             key={file.id}
-            className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-blue-500 transition-colors duration-200"
+            className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-200"
           >
             {/* File Info */}
             <div className="flex-1 min-w-0">
@@ -247,10 +249,10 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
                 
                 {/* File Details */}
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                     {file.fileName}
                   </p>
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                     <span>{formatFileSize(file.fileSize)}</span>
                     <span>•</span>
                     <span>{formatDate(file.uploadedAt)}</span>
@@ -266,7 +268,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
                 href={file.downloadURL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors duration-200"
               >
                 <svg
                   className="w-4 h-4 mr-1.5"
@@ -288,7 +290,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
               {isAdmin && (
                 <button
                   onClick={() => handleDelete(file)}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 transition-colors duration-200"
                 >
                   <svg
                     className="w-4 h-4 mr-1.5"
@@ -313,7 +315,7 @@ export default function FileList({ categoryId, className = '', isAdmin = false }
 
       {/* No Results Message */}
       {searchTerm && filteredFiles.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           <p>No files found matching "{searchTerm}"</p>
         </div>
       )}

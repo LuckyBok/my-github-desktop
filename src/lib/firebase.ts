@@ -3,6 +3,14 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
+// IMPORTANT: Add your Firebase configuration to your .env.local file:
+// NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+// NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com 
+// NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+// NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+// NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+// NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+
 const firebaseConfig = {
   // Your Firebase config object will go here
   // You'll need to replace these with your actual Firebase project config
