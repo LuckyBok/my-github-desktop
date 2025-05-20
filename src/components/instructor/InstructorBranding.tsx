@@ -8,6 +8,7 @@
 import { useAuth } from '@/context/AuthContext';
 import TabGroup, { TabItem } from '../ui/TabGroup';
 import DashboardCard from '../ui/DashboardCard';
+import LoadingSpinner from '../ui/LoadingSpinner';
 
 // Import lazy-loaded components to avoid hydration issues
 import dynamic from 'next/dynamic';
@@ -15,12 +16,12 @@ import dynamic from 'next/dynamic';
 // Dynamically load instructor components
 const InstructorProfile = dynamic(() => import('./InstructorProfile'), {
   ssr: false,
-  loading: () => <div className="p-4">Loading profile...</div>
+  loading: () => <LoadingSpinner message="Loading profile..." size="sm" testId="profile-loading" />
 });
 
 const InstructorGrowth = dynamic(() => import('./InstructorGrowth'), {
   ssr: false,
-  loading: () => <div className="p-4">Loading growth metrics...</div>
+  loading: () => <LoadingSpinner message="Loading growth metrics..." size="sm" testId="growth-loading" />
 });
 
 export interface InstructorBrandingProps {
@@ -48,7 +49,7 @@ const InstructorBranding: React.FC<InstructorBrandingProps> = ({
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             Personalize your professional profile to showcase your expertise and teaching style.
           </p>
-          <InstructorProfile />
+          <InstructorProfile testId={`${testId}-profile`} />
         </div>
       )
     },
@@ -61,7 +62,7 @@ const InstructorBranding: React.FC<InstructorBrandingProps> = ({
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             Track your growth as an instructor through key metrics like lectures created and revenue generated.
           </p>
-          <InstructorGrowth />
+          <InstructorGrowth testId={`${testId}-growth`} />
         </div>
       )
     }

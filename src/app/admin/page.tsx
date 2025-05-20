@@ -8,7 +8,7 @@ import StatisticsPanel from '@/components/StatisticsPanel';
 import ThemeToggle from '@/components/ThemeToggle';
 import DownloadAllFiles from '@/components/DownloadAllFiles';
 import RevenueTracker from '@/components/RevenueTracker';
-import InstructorBranding from '@/components/InstructorBranding';
+import InstructorBranding from '@/components/instructor/InstructorBranding';
 import WeeklyReportGenerator from '@/components/WeeklyReportGenerator';
 import LectureRequests from '@/components/LectureRequests';
 import TemplateManager from '@/components/TemplateManager';

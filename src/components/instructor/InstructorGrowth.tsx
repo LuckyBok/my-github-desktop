@@ -1,3 +1,8 @@
+/**
+ * InstructorGrowth component
+ * 
+ * Displays growth metrics for instructors including lectures and income
+ */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,6 +13,11 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
+
+// Import reusable components
+import DashboardCard from '../ui/DashboardCard';
+import LoadingSpinner from '../ui/LoadingSpinner';
+import ErrorAlert from '../ui/ErrorAlert';
 
 interface YearlyMetric {
   year: number;
@@ -20,7 +30,13 @@ interface CategoryCount {
   [category: string]: number;
 }
 
-export default function InstructorGrowth() {
+export interface InstructorGrowthProps {
+  testId?: string;
+}
+
+const InstructorGrowth: React.FC<InstructorGrowthProps> = ({
+  testId = 'instructor-growth'
+}) => {
   const { isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -135,97 +151,92 @@ export default function InstructorGrowth() {
     }).format(value);
   };
 
+  // Only available to admins
   if (!isAdmin) {
     return null;
   }
 
+  // Show loading state
   if (loading) {
-    return (
-      <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">Loading growth metrics...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Loading growth metrics..." testId={`${testId}-loading`} />;
   }
 
+  // Show error state
   if (error) {
-    return (
-      <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-red-400 dark:text-red-300" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-red-800 dark:text-red-300">{error}</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorAlert message={error} testId={`${testId}-error`} />;
   }
 
   // Handle case with no data
   if (growthData.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-        <p>No growth data available yet.</p>
-        <p className="mt-2 text-sm">Upload files and record income to see your growth metrics.</p>
-      </div>
+      <DashboardCard testId={`${testId}-empty`}>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <p>No growth data available yet.</p>
+          <p className="mt-2 text-sm">Upload files and record income to see your growth metrics.</p>
+        </div>
+      </DashboardCard>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Timeline view */}
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Growth Timeline
-        </h3>
-        <div className="w-full overflow-hidden">
-          <div className="relative">
-            {growthData.map((data, index) => (
-              <div key={data.year} className="mb-8 flex items-center">
-                {/* Year bubble */}
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center text-white font-bold">
-                  {data.year}
-                </div>
-                
-                {/* Line connector */}
-                {index < growthData.length - 1 && (
-                  <div className="absolute left-6 w-0.5 bg-blue-300 dark:bg-blue-700 h-8 transform translate-y-12 z-0"></div>
-                )}
-                
-                {/* Stats card */}
-                <div className="ml-4 flex-grow bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 z-10">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Lectures Created</p>
-                      <p className="text-xl font-semibold text-gray-900 dark:text-white">{data.lectures}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
-                      <p className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(data.income)}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Top Category</p>
-                      <p className="text-xl font-semibold text-gray-900 dark:text-white">{data.topCategory}</p>
-                    </div>
+  // Growth timeline component
+  const GrowthTimeline = () => (
+    <DashboardCard 
+      title="Growth Timeline" 
+      testId={`${testId}-timeline`}
+    >
+      <div className="w-full overflow-hidden">
+        <div className="relative">
+          {growthData.map((data, index) => (
+            <div key={data.year} className="mb-8 flex items-center">
+              {/* Year bubble */}
+              <div 
+                className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center text-white font-bold"
+                aria-label={`Year ${data.year}`}
+              >
+                {data.year}
+              </div>
+              
+              {/* Line connector */}
+              {index < growthData.length - 1 && (
+                <div className="absolute left-6 w-0.5 bg-blue-300 dark:bg-blue-700 h-8 transform translate-y-12 z-0"></div>
+              )}
+              
+              {/* Stats card */}
+              <div className="ml-4 flex-grow bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 z-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Lectures Created</p>
+                    <p className="text-xl font-semibold text-gray-900 dark:text-white">{data.lectures}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
+                    <p className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(data.income)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Top Category</p>
+                    <p className="text-xl font-semibold text-gray-900 dark:text-white">{data.topCategory}</p>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
+    </DashboardCard>
+  );
+
+  return (
+    <div className="space-y-6" data-testid={testId}>
+      {/* Timeline view */}
+      <GrowthTimeline />
 
       {/* Growth Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Lectures Growth Chart */}
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            Lectures Created
-          </h3>
+        <DashboardCard 
+          title="Lectures Created"
+          testId={`${testId}-lectures-chart`}
+        >
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={growthData}>
@@ -243,13 +254,13 @@ export default function InstructorGrowth() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </DashboardCard>
 
         {/* Income Growth Chart */}
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            Revenue Growth
-          </h3>
+        <DashboardCard 
+          title="Revenue Growth"
+          testId={`${testId}-revenue-chart`}
+        >
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={growthData}>
@@ -267,8 +278,10 @@ export default function InstructorGrowth() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </DashboardCard>
       </div>
     </div>
   );
-} 
+};
+
+export default InstructorGrowth; 
