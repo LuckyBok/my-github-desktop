@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image, Font } from '@react-pdf/renderer';
 import { ProfileData, MetricData, GrowthData, TemplateData } from '@/types/portfolio';
 
@@ -156,12 +156,14 @@ const PortfolioPDF = ({
   profile, 
   metrics, 
   growthData, 
-  templates 
+  templates,
+  generatedDate
 }: { 
   profile: ProfileData; 
   metrics: MetricData; 
   growthData: GrowthData[];
   templates: TemplateData[];
+  generatedDate?: string;
 }) => {
   // Format currency for display
   const formatCurrency = (value: number) => {
@@ -272,7 +274,7 @@ const PortfolioPDF = ({
         
         {/* Footer */}
         <Text style={styles.footer}>
-          Generated on {new Date().toLocaleDateString()} • {profile.name || 'Instructor'} Portfolio
+          Generated on {generatedDate || 'N/A'} • {profile.name || 'Instructor'} Portfolio
         </Text>
       </Page>
     </Document>
@@ -291,8 +293,27 @@ const DownloadPortfolioPDF = ({
   growthData: GrowthData[];
   templates: TemplateData[];
 }) => {
+  // Add state for client-side rendering check and date
+  const [isClient, setIsClient] = useState(false);
+  const [currentDate, setCurrentDate] = useState('');
+  const [formattedFilename, setFormattedFilename] = useState('Portfolio');
+
+  // Set isClient to true after hydration
+  useEffect(() => {
+    setIsClient(true);
+    
+    // Set date values only on the client
+    const date = new Date();
+    setCurrentDate(date.toLocaleDateString());
+    setFormattedFilename(`${profile?.name || 'Instructor'}_Portfolio_${date.toLocaleDateString().replace(/\//g, '-')}`);
+  }, [profile?.name]);
+  
   // Create a filename based on the instructor's name
-  const filename = `${profile?.name || 'Instructor'}_Portfolio_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`;
+  const filename = `${formattedFilename}.pdf`;
+  
+  if (!isClient) {
+    return <div>Loading PDF generator...</div>;
+  }
   
   return (
     <PDFDownloadLink 
@@ -302,6 +323,7 @@ const DownloadPortfolioPDF = ({
           metrics={metrics} 
           growthData={growthData}
           templates={templates}
+          generatedDate={currentDate}
         />
       } 
       fileName={filename}

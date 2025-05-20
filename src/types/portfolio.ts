@@ -16,7 +16,7 @@ export interface FileData {
   fileType: string;
   downloadURL: string;
   categoryId: string;
-  uploadedAt: any;
+  uploadedAt: Timestamp | Date;
   organization?: string;
 }
 
@@ -28,7 +28,7 @@ export interface TemplateData {
   downloadURL: string;
   price?: string;
   tags?: string[];
-  uploadedAt: any;
+  uploadedAt: Timestamp | Date;
 }
 
 export interface LectureRequest {
@@ -37,14 +37,14 @@ export interface LectureRequest {
   email: string;
   topic: string;
   message: string;
-  createdAt?: any;
+  createdAt?: Timestamp | Date;
 }
 
 export interface IncomeData {
   id: string;
   incomeAmount: number;
   organization?: string;
-  date: any;
+  date: Timestamp | Date;
 }
 
 export interface MetricData {

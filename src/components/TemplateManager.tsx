@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 
 interface TemplateData {
   id: string;
@@ -25,20 +26,30 @@ interface TemplateForm {
 }
 
 export default function TemplateManager() {
+  const { isAdmin } = useAuth();
   const [templates, setTemplates] = useState<TemplateData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+  const [timestamp, setTimestamp] = useState<number>(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [templateForm, setTemplateForm] = useState<TemplateForm>({
     title: '',
     description: '',
     price: '',
     tags: ''
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Set isClient to true after hydration
+  useEffect(() => {
+    setIsClient(true);
+    setTimestamp(Date.now());
+  }, []);
   
   useEffect(() => {
     fetchTemplates();
@@ -100,8 +111,9 @@ export default function TemplateManager() {
     setError(null);
     
     try {
-      // Create a storage reference
-      const storagePath = `templates/${Date.now()}_${selectedFile.name}`;
+      // Create a storage reference with a safe timestamp
+      const currentTimestamp = isClient ? timestamp : 0;
+      const storagePath = `templates/${currentTimestamp}_${selectedFile.name}`;
       const storageRef = ref(storage, storagePath);
       
       // Upload file

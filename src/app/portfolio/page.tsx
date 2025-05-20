@@ -105,6 +105,8 @@ export default function PortfolioPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+  const [currentYear, setCurrentYear] = useState('');
 
   useEffect(() => {
     async function fetchData() {
@@ -217,8 +219,8 @@ export default function PortfolioPage() {
         growthArray.sort((a, b) => a.year - b.year);
         setGrowthData(growthArray);
 
-      } catch (err) {
-        console.error('Error fetching portfolio data:', err);
+      } catch (error) {
+        console.error('Error fetching portfolio data:', error);
         setError('Failed to load portfolio data');
       } finally {
         setLoading(false);
@@ -226,6 +228,16 @@ export default function PortfolioPage() {
     }
 
     fetchData();
+    
+    // Set isClient to true after hydration
+    setIsClient(true);
+    // Set current year for copyright after hydration
+  }, []);
+
+  // Add to useEffect
+  useEffect(() => {
+    // Set current year for copyright after hydration
+    setCurrentYear(new Date().getFullYear().toString());
   }, []);
 
   // Format currency for display
@@ -788,9 +800,7 @@ export default function PortfolioPage() {
       </section>
       
       {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 dark:text-gray-400 py-8">
-        <p>© {new Date().getFullYear()} {profile?.name || 'Instructor'}. All rights reserved.</p>
-      </footer>
+            <footer className="text-center text-sm text-gray-500 dark:text-gray-400 py-8">        <p>© {isClient ? new Date().getFullYear() : '2024'} {profile?.name || 'Instructor'}. All rights reserved.</p>      </footer>
     </div>
   );
 } 

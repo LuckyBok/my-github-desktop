@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { httpsCallable, getFunctions } from 'firebase/functions';
 import { db } from '@/lib/firebase';
@@ -13,7 +13,15 @@ interface FileData {
   id: string;
   fileName: string;
   organization?: string;
-  [key: string]: any;
+  fileSize?: number;
+  fileType?: string;
+  categoryId?: string;
+  downloadURL?: string;
+  uploadedAt?: Timestamp;
+  storagePath?: string;
+  summary?: string;
+  tags?: string[];
+  notes?: string;
 }
 
 interface OrganizationData {
@@ -71,7 +79,7 @@ const styles = StyleSheet.create({
 });
 
 // Define PDF Document component
-const WeeklyReportPDF: React.FC<{ data: ReportData }> = ({ data }) => (
+const WeeklyReportPDF: React.FC<{ data: ReportData, generatedDate?: string }> = ({ data, generatedDate }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <Text style={styles.title}>Weekly Admin Report</Text>
@@ -124,7 +132,7 @@ const WeeklyReportPDF: React.FC<{ data: ReportData }> = ({ data }) => (
       </View>
       
       <Text style={[styles.text, { marginTop: 20 }]}>
-        Report generated on {format(new Date(), 'MMMM d, yyyy')}
+        Report generated on {generatedDate || 'N/A'}
       </Text>
     </Page>
   </Document>
@@ -132,12 +140,24 @@ const WeeklyReportPDF: React.FC<{ data: ReportData }> = ({ data }) => (
 
 export default function WeeklyReportGenerator() {
   const { isAdmin } = useAuth();
+  
+  const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [reportData, setReportData] = useState<ReportData | null>(null);
   const [adminEmail, setAdminEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [formattedDate, setFormattedDate] = useState('');
+  const [formattedDisplayDate, setFormattedDisplayDate] = useState('');
+
+  // Set isClient to true after hydration
+  useEffect(() => {
+    setIsClient(true);
+    const now = new Date();
+    setFormattedDate(format(now, 'yyyy-MM-dd'));
+    setFormattedDisplayDate(format(now, 'MMMM d, yyyy'));
+  }, []);
 
   // Function to generate the report data
   const generateReportData = async () => {
@@ -279,8 +299,8 @@ export default function WeeklyReportGenerator() {
             
             {reportData && (
               <PDFDownloadLink
-                document={<WeeklyReportPDF data={reportData} />}
-                fileName={`weekly-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`}
+                document={<WeeklyReportPDF data={reportData} generatedDate={formattedDisplayDate} />}
+                fileName={`weekly-report-${formattedDate}.pdf`}
                 className="px-4 py-2 rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500"
               >
                 {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF...' : 'Download PDF')}

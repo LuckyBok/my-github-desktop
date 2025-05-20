@@ -9,7 +9,7 @@ import { generateFileMetadata } from '@/lib/openai';
 import CategorySelector from './CategorySelector';
 import { categories } from '@/lib/categories';
 
-interface FileMetadata {
+export interface FileMetadata {
   fileName: string;
   fileSize: number;
   fileType: string;
@@ -40,6 +40,7 @@ export default function FileUploader({
   onUploadComplete,
   onError,
   className = '',
+  maxFileSizeMB = 20,
 }: FileUploaderProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
@@ -49,6 +50,7 @@ export default function FileUploader({
   const [isUploading, setIsUploading] = useState(false);
   const [sheetsError, setSheetsError] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [generatingMetadata, setGeneratingMetadata] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -60,12 +62,29 @@ export default function FileUploader({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
-    setSelectedFile(file);
+    
+    // Reset all states
     setSheetsError(null);
     setAiError(null);
+    setFileSizeError(null);
     setUploadSuccess(false);
     setGptSuggestion(null);
     setShowSuggestionPreview(false);
+    
+    // Validate file size
+    if (file) {
+      const fileSizeInMB = file.size / (1024 * 1024);
+      if (fileSizeInMB > maxFileSizeMB) {
+        setFileSizeError(`File size exceeds the ${maxFileSizeMB}MB limit. Please choose a smaller file.`);
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+    }
+    
+    setSelectedFile(file);
     
     // Clear category if file changed
     setSelectedCategoryId('');
@@ -189,12 +208,20 @@ export default function FileUploader({
       alert('Please select both a file and a category');
       return;
     }
+    
+    // Double-check file size before upload
+    const fileSizeInMB = selectedFile.size / (1024 * 1024);
+    if (fileSizeInMB > maxFileSizeMB) {
+      setFileSizeError(`File size exceeds the ${maxFileSizeMB}MB limit. Please choose a smaller file.`);
+      return;
+    }
 
     try {
       setIsUploading(true);
       setUploadProgress(0);
       setSheetsError(null);
       setAiError(null);
+      setFileSizeError(null);
       setUploadSuccess(false);
 
       // Create a storage reference
@@ -453,6 +480,24 @@ export default function FileUploader({
             <div className="ml-3">
               <h3 className="text-sm font-medium text-green-800 dark:text-green-300">
                 File uploaded and logged to Google Sheets successfully!
+              </h3>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* File Size Error Message */}
+      {fileSizeError && (
+        <div className="mt-2 rounded-md bg-red-50 dark:bg-red-900/30 p-3">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400 dark:text-red-300" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
+                {fileSizeError}
               </h3>
             </div>
           </div>

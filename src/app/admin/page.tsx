@@ -34,12 +34,12 @@ export default function AdminDashboard() {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">Admin Dashboard</h1>
               <div className="flex items-center space-x-3 sm:space-x-4">
                 <ThemeToggle />
-                <button
-                  onClick={() => signOut()}
+            <button
+              onClick={() => signOut()}
                   className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 dark:hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-red-400 dark:focus:ring-offset-gray-800"
-                >
-                  Sign Out
-                </button>
+            >
+              Sign Out
+            </button>
               </div>
             </div>
             

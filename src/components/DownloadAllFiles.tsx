@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { ref, getBlob } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
@@ -25,10 +25,20 @@ export default function DownloadAllFiles() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [timestamp, setTimestamp] = useState('');
   const { user } = useAuth();
 
   // Get admin status from AuthContext
   const { isAdmin } = useAuth();
+  
+  // Set isClient to true after hydration
+  useEffect(() => {
+    setIsClient(true);
+    // Generate timestamp in a safe way
+    const date = new Date();
+    setTimestamp(date.toISOString().replace(/[:.]/g, '-'));
+  }, []);
 
   const downloadAllFiles = async () => {
     if (!isAdmin) {
@@ -94,9 +104,9 @@ export default function DownloadAllFiles() {
       const downloadLink = document.createElement('a');
       downloadLink.href = downloadUrl;
       
-      // Set timestamp for unique filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      downloadLink.download = `all-files-${timestamp}.zip`;
+      // Use the timestamp from state
+      const currentTimestamp = isClient ? timestamp : 'download';
+      downloadLink.download = `all-files-${currentTimestamp}.zip`;
       
       // Trigger download
       document.body.appendChild(downloadLink);

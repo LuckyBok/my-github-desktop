@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import { AuthProvider } from '@/context/AuthContext';
 import FileUploader from '@/components/FileUploader';
 import FileList from '@/components/FileList';
+import type { FileMetadata } from '@/components/FileUploader';
 
 export default function TestUploadPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
-  const [lastUploadedFile, setLastUploadedFile] = useState<{url: string, metadata: any} | null>(null);
+  const [lastUploadedFile, setLastUploadedFile] = useState<{url: string, metadata: FileMetadata} | null>(null);
 
-  const handleUploadComplete = (fileUrl: string, metadata: any) => {
+  const handleUploadComplete = (fileUrl: string, metadata: FileMetadata) => {
     setLastUploadedFile({ url: fileUrl, metadata });
     setSelectedCategoryId(metadata.categoryId);
   };

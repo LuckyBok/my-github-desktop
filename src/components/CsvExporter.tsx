@@ -1,11 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 export default function CsvExporter() {
   const [isExporting, setIsExporting] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [formattedDate, setFormattedDate] = useState('export');
+
+  // Set isClient to true after hydration
+  useEffect(() => {
+    setIsClient(true);
+    const date = new Date();
+    setFormattedDate(date.toISOString().split('T')[0]); // YYYY-MM-DD
+  }, []);
 
   const downloadCsv = async () => {
     try {
@@ -52,10 +61,9 @@ export default function CsvExporter() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       
-      // Set up download attributes
-      const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      // Set up download attributes with the date from state
       link.setAttribute('href', url);
-      link.setAttribute('download', `files-export-${date}.csv`);
+      link.setAttribute('download', `files-export-${formattedDate}.csv`);
       link.style.visibility = 'hidden';
       
       // Add to document, trigger download and remove

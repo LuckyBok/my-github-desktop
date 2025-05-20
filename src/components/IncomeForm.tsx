@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, Timestamp, FieldValue } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 
@@ -10,7 +10,7 @@ export interface IncomeData {
   organization: string;
   date: Date;
   notes?: string;
-  createdAt?: any;
+  createdAt?: Timestamp | Date | FieldValue;
   createdBy?: string;
 }
 
